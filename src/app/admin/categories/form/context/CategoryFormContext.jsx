@@ -1,6 +1,8 @@
 "use client"
 
 import { createContext, useContext, useState } from "react";
+import { createNewCategory, updateCategory } from "../../../../../../lib/firebase/catetgory/write";
+import { getCategory } from "../../../../../../lib/firebase/catetgory/read";
 
 
 const CategoryFormContext = createContext();
@@ -13,6 +15,7 @@ export default function CategoryFormContextProvider({ children }){
     const [image, setImage] = useState(null);
 
 const handleData = (key,value)=>{
+    isDone(false)
     setData({
         ...data,
         [key]:value,
@@ -24,7 +27,38 @@ const handleCreate  = async () => {
     setError(null)
     setIsDone(false)
     try {
+        await createNewCategory({data : data , image : image})
         setIsDone(true)
+    } catch (error) {
+        setError(error?.massage)
+    }
+    setIsLoading(false)
+}
+
+const handleUpdate  = async () => {
+    setIsLoading(true)
+    setError(null)
+    setIsDone(false)
+    try {
+        await updateCategory({data : data , image : image})
+        setIsDone(true)
+    } catch (error) {
+        setError(error?.massage)
+    }
+    setIsLoading(false)
+}
+
+const fetchData = async (id) => {
+    setIsLoading(true)
+    setError(null)
+    setIsDone(false)
+    try {
+        const res = await getCategory(id);
+        if(res.exists()){
+            setData(res.date())
+        }else{
+            throw new Error(`No category found from id ${id}`)
+        }
     } catch (error) {
         setError(error?.massage)
     }
@@ -39,8 +73,10 @@ return(
         isDone,
         handleData,
         handleCreate,
+        handleUpdate,
         image,
         setImage,
+        fetchData,
     }}>{children}
         
     </CategoryFormContext.Provider>

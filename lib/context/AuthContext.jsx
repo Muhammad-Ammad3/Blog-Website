@@ -1,64 +1,64 @@
-"use client"
+"use client";
 
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "../FireBase";
+
 const AuthContext = createContext();
 
-export default function AuthContextProvider({children}){
+export default function AuthContextProvider({ children }) {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
-useEffect(()=>{
-    setIsLoading(true)
-    const unsub = onAuthStateChanged( auth, (user) => {
-        if(user){
-            setUser(user);
-        }else{
-            setUser(null);
-        }
-        setIsLoading(false)
-    });
-    return () => unsub();
-},[])
+    useEffect(() => {
+        setIsLoading(true);
+        const unsub = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setUser(user);
+            } else {
+                setUser(null);
+            }
+            setIsLoading(false);
+        });
 
+        return () => unsub(); 
+    }, []);
 
-    const handleSignInWithGoogle = async()=>{
-try {
-    setIsLoading(true)
-    await signInWithPopup(auth, new GoogleAuthProvider());
-    
-} catch (error) {
-    setError(error?.message)
-    
-}
-setIsLoading(false)
-
-    }
-    const handelLogOut = async()=>{
+    const handleSignInWithGoogle = async () => {
         try {
-            setIsLoading(true)
-            await signOut(auth)
-            
+            setIsLoading(true);
+            await signInWithPopup(auth, new GoogleAuthProvider());
         } catch (error) {
-            setError(error?.message)
-            
+            setError(error?.message); 
         }
-        setIsLoading(false)    }
+        setIsLoading(false);
+    };
 
-return <AuthContext.Provider 
-value={{
-    user,
-    isLoading,
-    error,
-    handleSignInWithGoogle,
-    handelLogOut,
-}}>
-    {children}
-</AuthContext.Provider>
+    const handleLogOut = async () => {
+        try {
+            setIsLoading(true);
+            await signOut(auth);
+            setUser(null); 
+        } catch (error) {
+            setError(error?.message); 
+        }
+        setIsLoading(false);
+    };
+
+    return (
+        <AuthContext.Provider 
+            value={{
+                user,
+                isLoading,
+                error,
+                handleSignInWithGoogle,
+                handleLogOut,
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
 }
 
 export const useAuth = () => useContext(AuthContext);
-
- 

@@ -1,27 +1,36 @@
-"use client"
+"use client";
 
-import { collection, doc, getDoc, onSnapshot } from "firebase/firestore"
-import useSWRSubscription from "swr/subscription"
-import { db } from "../../FireBase"
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { db } from "../../FireBase";
 
-export function useCategories(){
-const {data , error} = useSWRSubscription(['categories'] , ([path],{next}) =>{
-    const ref = collection(db, path);
+export const fetchCategories = async () => {
+  console.log("Fetching all categories...");
+  try {
+    const querySnapshot = await getDocs(collection(db, 'categories'));
+    const categories = querySnapshot.docs.map(doc => doc.data());
+    console.log(`Fetched ${categories.length} categories`);
+    return categories;
+  } catch (error) {
+    console.error("Error fetching categories: ", error);
+    throw new Error(`Error fetching categories: ${error.message}`);
+  }
+};
 
-const unsub = onSnapshot(ref , (snaps)=>{
-    next(null , snaps.docs.map((v) => v.data()))
-} , (error) => {
-    next(error?.massage)
-})
-return () => unsub();
-})
+export const getCategory = async (id) => {
+  console.log(`Fetching category with ID: ${id}`);
+  try {
+    const docRef = doc(db, `categories/${id}`);
+    const docSnap = await getDoc(docRef);
 
-return{
-    data,
-    error,
-    isLoading : data === undefined ? true : false
-}
-}
-export const getCategory = async (id)=>{
-    return await getDoc(doc(db,`categories/${id}`));
-}
+    if (docSnap.exists()) {
+      console.log(`Category with ID: ${id} found`);
+      return docSnap.data();
+    } else {
+      console.warn(`No category found with ID: ${id}`);
+      throw new Error(`No category found with ID: ${id}`);
+    }
+  } catch (error) {
+    console.error(`Error fetching category with ID: ${id}: `, error);
+    throw new Error(`Error fetching category: ${error.message}`);
+  }
+};

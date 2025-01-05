@@ -1,6 +1,6 @@
-import { CopyPlus } from "lucide-react";
 import Link from "next/link";
 import CategoriesListView from "./components/CategoriesListView";
+import { CopyPlus } from "lucide-react";
 
 export default function Page(){
     return (

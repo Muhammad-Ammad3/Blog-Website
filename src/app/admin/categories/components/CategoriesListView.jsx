@@ -1,10 +1,10 @@
 "use client"
 
 import Link from "next/link";
-import { useCategories } from "../../../../../lib/firebase/catetgory/read"
+import { fetchCategories } from "../../../../../lib/firebase/catetgory/read";
 
 export default function CategoriesListView(){
-    const { data , error , isLoading } = useCategories();
+    const { data , error , isLoading } = fetchCategories();
     if(isLoading){
         return <h1>Loading...</h1>
     }
